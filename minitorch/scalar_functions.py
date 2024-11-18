@@ -38,6 +38,7 @@ class ScalarFunction:
 
     @classmethod
     def apply(cls, *vals: ScalarLike) -> Scalar:
+        """Apply the function to the given scalar-like values."""
         raw_vals = []
         scalars = []
         for v in vals:
@@ -66,10 +67,12 @@ class Add(ScalarFunction):
 
     @staticmethod
     def forward(ctx: Context, a: float, b: float) -> float:
-        return a + b
+        """Add two scalar values."""
+        return operators.add(a, b)
 
     @staticmethod
-    def backward(ctx: Context, d_output: float) -> Tuple[float, ...]:
+    def backward(ctx: Context, d_output: float) -> Tuple[float, float]:
+        """Backward pass for addition operation."""
         return d_output, d_output
 
 
@@ -78,11 +81,13 @@ class Log(ScalarFunction):
 
     @staticmethod
     def forward(ctx: Context, a: float) -> float:
+        """Forward pass for log operation."""
         ctx.save_for_backward(a)
         return operators.log(a)
 
     @staticmethod
     def backward(ctx: Context, d_output: float) -> float:
+        """Backward pass for log operation."""
         (a,) = ctx.saved_values
         return operators.log_back(a, d_output)
 
@@ -90,3 +95,190 @@ class Log(ScalarFunction):
 # To implement.
 
 
+# TODO: Implement for Task 1.2.
+
+
+class Mul(ScalarFunction):
+    """Multiplication function $f(x,y) = x*y$"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float, b: float) -> float:
+        """Forward pass for multiplication operation."""
+        ctx.save_for_backward(a, b)
+        return operators.mul(a, b)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> Tuple[float, float]:
+        """Backward pass for multiplication operation."""
+        (a, b) = ctx.saved_values
+        return d_output * b, d_output * a
+        # return operators.mul(d_output,b), operators.mul(d_output,a)
+
+
+# # add Div forward backward
+# class Div(ScalarFunction) :
+#     @staticmethod
+#     def forward(ctx : Context, a : float, b : float) -> float:
+#         """Forward pass for division operation."""
+#         ctx.save_for_backward(a, b)
+#         return operators.div(a, b)
+
+#     @staticmethod
+#     def backward(ctx : Context, d_output : float) -> Tuple[float,float]:
+#         """Backward pass for division operation"""
+#         (a,b) = ctx.saved_values
+
+#         da = operators.div(d_output,b)
+#         db = operators,Neg(operators.div(operators.mul(d_output,a),operators.mul(b,b)))
+#         return da,db
+
+
+class Inv(ScalarFunction):
+    """Inverse function $f(x) = 1/x$"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float) -> float:
+        """Compute the inverse of the input."""
+        ctx.save_for_backward(a)
+        return operators.inv(a)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> float:
+        """Backward pass for inverse operation."""
+        (a,) = ctx.saved_values
+        # return -d_output*operators.inv_back(a, d_output)
+        # return d_output*operators.inv_back(a, d_output)
+        return operators.inv_back(a, d_output)
+
+
+class Neg(ScalarFunction):
+    """Negation function $f(x) = -x$"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float) -> float:
+        """Forward pass for negation operation."""
+        return operators.neg(a)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> float:
+        """Backward pass for negation operation."""
+        return operators.neg(d_output)
+
+
+class Sigmoid(ScalarFunction):
+    """Sigmoid function $f(x) = 1/(1+exp(-x))$"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float) -> float:
+        """Forward pass for sigmoid operation."""
+        ctx.save_for_backward(a)
+        return operators.sigmoid(a)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> float:
+        """Backward pass for sigmoid function.
+
+        Args:
+        ----
+            ctx (Context): The context object.
+            d_output (float): The gradient from the output.
+
+        Returns:
+        -------
+            float: The gradient with respect to the input.
+
+        """
+        (a,) = ctx.saved_values
+        return d_output * operators.sigmoid_back(a, d_output)
+
+
+# class ReLU(ScalarFunction):
+class ReLU(ScalarFunction):
+    """ReLU function $f(x) = max(0, x)$"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float) -> float:
+        """Forward pass for ReLU operation."""
+        ctx.save_for_backward(a)
+        return operators.relu(a)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> float:
+        """Backward pass for ReLU operation."""
+        (a,) = ctx.saved_values
+        return d_output * operators.relu_back(a, d_output)
+
+
+class Exp(ScalarFunction):
+    """Exponential function $f(x) = exp(x)$"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float) -> float:
+        """Forward pass for exponential operation."""
+        ctx.save_for_backward(a)
+        return operators.exp(a)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> float:
+        """Backward pass for exponential operation."""
+        (a,) = ctx.saved_values
+        return d_output * operators.exp(a)
+
+
+class LT(ScalarFunction):
+    """Less than function $f(x,y) = x < y$"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float, b: float) -> float:
+        """Forward pass for less than operation."""
+        return operators.lt(a, b)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> Tuple[float, float]:
+        """Backward pass for less than operation."""
+        return 0.0, 0.0
+
+
+class EQ(ScalarFunction):
+    """Equal function $f(x,y) = x == y$"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float, b: float) -> float:
+        """Forward pass for equal operation."""
+        return operators.eq(a, b)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> Tuple[float, float]:
+        """Backward pass for equal operation."""
+        return 0.0, 0.0
+
+
+class GT(ScalarFunction):
+    """Greater than function $f(x,y) = x > y$"""
+
+    @staticmethod
+    def forward(ctx: Context, a: float, b: float) -> float:
+        """Forward pass for greater than operation."""
+        return operators.GT(a, b)
+
+    @staticmethod
+    def backward(ctx: Context, d_output: float) -> Tuple[float, float]:
+        """Backward pass for greater than operation."""
+        return 0.0, 0.0
+
+
+# class Sub(ScalarFunction):
+#     """Subtraction function $f(x,y) = x - y$"""
+#
+#     @staticmethod
+#     def forward(ctx : Context, a : float, b : float) -> float:
+#         """Forward pass for subtraction operation."""
+#         return operators.sub(a, b)
+#
+#     @staticmethod
+#     def backward(ctx : Context, d_output : float) -> Tuple[float, float]:
+#         """Backward pass for subtraction operation."""
+#         (a,b) = ctx.saved_values
+#         return d_output, -d_output
+#
+#

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Iterable, List, Tuple, Protocol
+from typing import Any, Iterable, Tuple, Protocol  # ,list
 
 
 # ## Task 1.1
@@ -25,26 +25,42 @@ def central_difference(f: Any, *vals: Any, arg: int = 0, epsilon: float = 1e-6) 
         An approximation of $f'_i(x_0, \ldots, x_{n-1})$
 
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    # return (f(vals[0] + epsilon, *vals[1:]) - f(vals[0] - epsilon, *vals[1:])) / (2 * epsilon)
+    vals_plus = list(vals)
+    vals_minus = list(vals)
+    vals_plus[arg] += epsilon
+    vals_minus[arg] -= epsilon
+    return (f(*vals_plus) - f(*vals_minus)) / (2 * epsilon)
 
 
 variable_count = 1
 
 
 class Variable(Protocol):
-    def accumulate_derivative(self, x: Any) -> None: ...
+    def accumulate_derivative(self, x: Any) -> None:
+        """Accumulate a derivative."""
 
     @property
-    def unique_id(self) -> int: ...
+    def unique_id(self) -> int:
+        """Return the unique identifier for this variable."""
+        ...
 
-    def is_leaf(self) -> bool: ...
+    def is_constant(self) -> bool:
+        """Check if the variable is constant."""
+        ...
 
-    def is_constant(self) -> bool: ...
+    def is_leaf(self) -> bool:
+        """Check if the variable is a leaf in the computation graph."""
+        ...
 
     @property
-    def parents(self) -> Iterable["Variable"]: ...
+    def parents(self) -> Iterable["Variable"]:
+        """Return an iterable of the variable's parents."""
+        ...
 
-    def chain_rule(self, d_output: Any) -> Iterable[Tuple[Variable, Any]]: ...
+    def chain_rule(self, d_output: Any) -> Iterable[Tuple[Variable, Any]]:
+        """Apply the chain rule with the given output gradient."""
+        ...
 
 
 def topological_sort(variable: Variable) -> Iterable[Variable]:
@@ -59,7 +75,21 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
         Non-constant Variables in topological order starting from the right.
 
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    visited = set()
+    sorted_nodes = []
+
+    def visit(v: Variable) -> None:
+        if v in visited or v.is_constant():
+            return
+        else:
+            # visited.add(v)
+            for parent in v.parents:
+                visit(parent)
+            sorted_nodes.append(v)
+            visited.add(v)
+
+    visit(variable)
+    return reversed(sorted_nodes)
 
 
 def backpropagate(variable: Variable, deriv: Any) -> None:
@@ -68,13 +98,25 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
 
     Args:
     ----
-        variable: The right-most variable
-        deriv  : Its derivative that we want to propagate backward to the leaves.
-
-    No return. Should write to its results to the derivative values of each leaf through `accumulate_derivative`.
+        variable: The variable to start backpropagation from.
+        deriv: The derivative of the output with respect to this variable.
 
     """
-    raise NotImplementedError("Need to include this file from past assignment.")
+    ordered_variables = [*topological_sort(variable)]
+    gradients = {variable: deriv}
+
+    for var in ordered_variables:
+        grad = gradients.get(var, 0)
+        if var.is_leaf():
+            var.accumulate_derivative(grad)
+        else:
+            for parent, parent_grad in var.chain_rule(grad):
+                if parent_grad is None:
+                    parent_grad = 0
+                if parent not in gradients:
+                    gradients[parent] = parent_grad
+                else:
+                    gradients[parent] += parent_grad
 
 
 @dataclass
@@ -92,4 +134,5 @@ class Context:
 
     @property
     def saved_tensors(self) -> Tuple[Any, ...]:
+        """Return the saved tensors."""
         return self.saved_values
