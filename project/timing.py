@@ -4,6 +4,12 @@ import minitorch
 import time
 import sys
 import numpy as np
+#New
+try:
+    import matplotlib.pyplot as plt
+    MATPLOTLIB_AVAILABLE = True
+except ImportError:
+    MATPLOTLIB_AVAILABLE = False
 
 FastTensorBackend = minitorch.TensorBackend(minitorch.FastOps)
 GPUBackend = minitorch.TensorBackend(minitorch.CudaOps)
@@ -17,18 +23,18 @@ def run_matmul(backend, size=16) -> None:
     z = x @ y
 
 
-if __name__ == "__main__":
-    # Warmup
-    run_matmul(FastTensorBackend)
-    run_matmul(GPUBackend)
+# if __name__ == "__main__":
+#     # Warmup
+#     run_matmul(FastTensorBackend)
+#     run_matmul(GPUBackend)
 
-    ntrials = 3
-    times = {}
-    for size in [64, 128, 256, 512, 1024]:
-        print(f"Running size {size}")
-        times[size] = {}
-        simple_times = []
-        fast_times = []
+#     ntrials = 3
+#     times = {}
+#     for size in [64, 128, 256, 512, 1024]:
+#         print(f"Running size {size}")
+#         times[size] = {}
+#         simple_times = []
+#         fast_times = []
     #     gpu_times = []
     #     for _ in range(ntrials):
     #         start_fast = time.time()
@@ -58,6 +64,10 @@ if __name__ == "__main__":
 
 ##NEW
 def plot_results(times):
+    if not MATPLOTLIB_AVAILABLE:
+        print("\nMatplotlib not available, skipping plot generation")
+        return
+    
     sizes = list(times.keys())
     fast_times = [times[size]["fast"] for size in sizes]
     gpu_times = [times[size]["gpu"] for size in sizes]
@@ -70,8 +80,13 @@ def plot_results(times):
     plt.title('Matrix Multiplication Performance: CPU vs GPU')
     plt.legend()
     plt.grid(True)
-    plt.yscale('log')
-    plt.savefig('matmul_benchmark.png')
+    # plt.yscale('log')
+    # plt.savefig('matmul_benchmark.png')
+    # plt.close()
+    try:
+        plt.savefig('matmul_benchmark.png')
+    except Exception as e:
+        print(f"\nError saving plot: {e}")
     plt.close()
 
 def calculate_speedup(times):
