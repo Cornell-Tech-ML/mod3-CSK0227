@@ -243,16 +243,13 @@ class Add(Function):
 ##All 3
 class All(Function):
     @staticmethod
-    def forward(ctx: Context, a: Tensor) -> Tensor:
+    def forward(ctx: Context, a: Tensor, dim: Tensor | None = None) -> Tensor:
         """Return 1 if all elements are true in the tensor."""
         # Reshape tensor to 1D and reduce
-        out = a.contiguous().view(int(operators.prod(a.shape)))
-        return a.f.mul_reduce(out, 0)
-
-    @staticmethod
-    def backward(ctx: Context, grad_output: Tensor) -> Tensor:
-        """Backward pass for all reduction."""
-        return grad_output.zeros(grad_output.shape)
+        if dim is not None:
+            return a.f.mul_reduce(a, int(dim.item()))
+        else:
+            return a.f.mul_reduce(a.contiguous().view(int(operators.prod(a.shape))), 0)
 
 
 ## TODO: Implement for Task 2.3.
@@ -270,16 +267,16 @@ class Mul(Function):
         """Backward pass for multiplication."""
         a, b = ctx.saved_values
         return (
-            grad_output.f.mul_zip(grad_output, b), 
-            grad_output.f.mul_zip(grad_output, a)
+            grad_output.f.mul_zip(b, grad_output), 
+            grad_output.f.mul_zip(a, grad_output),
         )
 
 
 class Sigmoid(Function):
     @staticmethod
-    def forward(ctx: Context, a: Tensor) -> Tensor:
+    def forward(ctx: Context, t1: Tensor) -> Tensor:
         """Applies the sigmoid function element-wise."""
-        out = a.f.sigmoid_map(a)
+        out = t1.f.sigmoid_map(t1)
         ctx.save_for_backward(out)
         return out
 
@@ -296,10 +293,10 @@ class Sigmoid(Function):
 
 class ReLU(Function):
     @staticmethod
-    def forward(ctx: Context, a: Tensor) -> Tensor:
+    def forward(ctx: Context, t1: Tensor) -> Tensor:
         """Applies the ReLU (Rectified Linear Unit) function element-wise."""
-        ctx.save_for_backward(a)
-        return a.f.relu_map(a)
+        ctx.save_for_backward(t1)
+        return t1.f.relu_map(t1)
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
@@ -313,10 +310,10 @@ class ReLU(Function):
 
 class Log(Function):
     @staticmethod
-    def forward(ctx: Context, a: Tensor) -> Tensor:
+    def forward(ctx: Context, t1: Tensor) -> Tensor:
         """Applies the natural logarithm function element-wise."""
-        ctx.save_for_backward(a)
-        out = a.f.log_map(a)
+        ctx.save_for_backward(t1)
+        out = t1.f.log_map(t1)
         return out
 
     @staticmethod
@@ -328,210 +325,23 @@ class Log(Function):
 
 class Exp(Function):
     @staticmethod
-    def forward(ctx: Context, a: Tensor) -> Tensor:
+    def forward(ctx: Context, t1: Tensor) -> Tensor:
         """Applies the exponential function element-wise."""
-        out = a.f.exp_map(a)
+        out = t1.f.exp_map(t1)
         ctx.save_for_backward(out)
         return out
 
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tensor:
         """Backward pass for exp. Given dL/dout, returns dL/dx."""
-        (exp_out,) = ctx.saved_values
-        return grad_output.f.mul_zip(exp_out, grad_output)
-
-
-##Sum2 << Attribute Error
-# class Sum(Function):
-#     @staticmethod
-#     def forward(ctx: Context, a: Tensor, dim: Optional[int] = None) -> Tensor:
-#         """Sums the elements of the tensor along the specified dimension."""
-#         ctx.save_for_backward(a.shape, dim)
-#         if dim is not None:
-#             return a.f.add_reduce(a, dim)
-#         else:
-#             return a.f.add_reduce(a.contiguous().view(int(operators.prod(a.shape))), 0)
-
-#     @staticmethod
-#     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Optional[float]]:
-#         """Backward pass for sum."""
-#         shape, dim = ctx.saved_values
-#         if dim is None:
-#             # For complete reduction, broadcast gradient to original shape
-#             out = grad_output.zeros(shape)
-#             out.f.fill_(out, grad_output[0])
-#             #out = tensor([grad_output[0]] * int(operators.prod(shape)), shape, backend=grad_output.backend)
-#             return out, None
-#         else:
-#             # For reduction along a dimension, broadcast gradient along that dimension
-#             out = grad_output.zeros(shape)
-#             out.f.fill_(out, 1.0)
-#             #out = tensor([1.0] * int(operators.prod(shape)), shape, backend=grad_output.backend)
-#             return out.f.mul_zip(out, grad_output), None
-
-#     @classmethod
-#     def apply(cls, a: Tensor, dim: Optional[int] = None) -> Tensor:
-#         """Apply function holding dim parameter"""
-#         # Special handling for optional dim parameter
-#         raw_vals = [a]
-#         need_grad = a.requires_grad()
-
-#         # Create the context
-#         ctx = Context(not need_grad)
-
-#         # Call forward with the variables
-#         c = cls._forward(ctx, a, dim)
-
-#         # Create a new variable from the result with a new history
-#         back = None
-#         if need_grad:
-#             back = minitorch.History(cls, ctx, (a,))  # Only include tensor in history
-#         return minitorch.Tensor(c._tensor, back, backend=c.backend)
-
-# #Sum8 Assertion Error <<
-# class Sum(Function):
-#     @staticmethod
-#     def forward(ctx: Context, a: Tensor, dim: Optional[int] = None) -> Tensor:
-#         """Sums the elements of the tensor along the specified dimension."""
-#         ctx.save_for_backward(a.shape, dim)
-#         if dim is not None:
-#             return a.f.add_reduce(a, dim)  # Sum along specific dimension
-#         else:
-#             # Flatten tensor and sum all elements
-#             return a.f.add_reduce(a.contiguous().view(int(operators.prod(a.shape))), 0)
-
-#     @staticmethod
-#     # def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Optional[float]]:
-#     #     """Backward pass for sum. Returns gradient for input tensor and None for dim."""
-#     #     shape, dim = ctx.saved_values
-
-#     #     if dim is None:
-#     #         # Case 1: Complete reduction (sum all elements)
-#     #         # Create tensor filled with grad_output[0] in the original shape
-#     #         return tensor(
-#     #             [float(grad_output[0])] * int(operators.prod(shape)),
-#     #             shape,
-#     #             backend=grad_output.backend
-#     #         ), None
-#     #     else:
-#     #         # Case 2: Reduction along a dimension
-#     #         # Create ones tensor in original shape
-#     #         ones = tensor(
-#     #             [1.0] * int(operators.prod(shape)),
-#     #             shape,
-#     #             backend=grad_output.backend
-#     #         )
-#     #         # Multiply by grad_output to broadcast gradient
-#     #         return ones * grad_output[0], None
-
-#     @staticmethod
-#     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, Optional[float]]:
-#         """Backward pass for sum. Returns gradient for input tensor and None for dim."""
-#         shape, dim = ctx.saved_values
-
-#         if dim is None:
-#             # Create tensor filled with grad_output[0] in the original shape
-#             grad_val = float(grad_output[0])
-#             return minitorch.Tensor.make(
-#                 [grad_val] * int(operators.prod(shape)),
-#                 shape,
-#                 backend=grad_output.backend
-#             ), None
-#         else:
-#             # Create ones tensor and multiply by grad_output
-#             grad_val = float(grad_output[0])
-#             return minitorch.Tensor.make(
-#                 [grad_val] * int(operators.prod(shape)),
-#                 shape,
-#                 backend=grad_output.backend
-#             ), None
-
-#     @classmethod
-#     def apply(cls, a: Tensor, dim: Optional[int] = None) -> Tensor:
-#         """Apply function holding dim parameter"""
-#         # Special handling for optional dim parameter
-#         raw_vals = [a]
-#         need_grad = a.requires_grad()
-
-#         # Create the context
-#         ctx = Context(not need_grad)
-
-#         # Call forward with the variables
-#         c = cls._forward(ctx, a, dim)
-
-#         # Create a new variable from the result with a new history
-#         back = None
-#         if need_grad:
-#             back = minitorch.History(cls, ctx, (a,))  # Only include tensor in history
-#         return minitorch.Tensor(c._tensor, back, backend=c.backend)
-
-
-# ##sum 9 << 63
-# class Sum(Function):
-#     @staticmethod
-#     def forward(ctx: Context, t1: Tensor, dim: Optional[Tensor] = None) -> Tensor:
-#         """Computes the forward pass for summation."""
-#         # Save the input shape and dimension for backward pass
-#         ctx.save_for_backward(t1.shape, dim)
-
-#         if dim is not None:
-#             # If dimension is specified, convert it to int and sum along that dim
-#             dim_val = int(dim.item())
-#             return t1.f.add_reduce(t1, dim_val)
-#         else:
-#             # If no dimension specified, sum all elements
-#             # First make tensor contiguous and reshape to 1D
-#             flattened = t1.contiguous().view(t1.size)
-#             return t1.f.add_reduce(flattened, 0)
-
-#     @staticmethod
-#     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor]:
-#         """Computes the backward pass for summation."""
-#         shape, _ = ctx.saved_values
-
-#         # Create ones tensor with original shape
-#         ones = minitorch.ones(shape, backend=grad_output.backend)
-#         total_elements = int(operators.prod(shape))  # Get total number of elements that were summed
-#         grad_input = grad_output.expand(ones) / total_elements
-
-#         return grad_input,
-
-
-# ##sum 9-1
-# class Sum(Function):
-#     @staticmethod
-#     def forward(ctx: Context, t1: Tensor, dim: Optional[Tensor] = None) -> Tensor:
-#         """Computes the forward pass for summation."""
-#         # Save the input shape and dimension for backward pass
-#         ctx.save_for_backward(t1.shape, dim)
-
-#         if dim is not None:
-#             # If dimension is specified, convert it to int and sum along that dim
-#             dim_val = int(dim.item())
-#             return t1.f.add_reduce(t1, dim_val)
-#         else:
-#             # If no dimension specified, sum all elements
-#             # First make tensor contiguous and reshape to 1D
-#             flattened = t1.contiguous().view(t1.size)
-#             return t1.f.add_reduce(flattened, 0)
-
-#     @staticmethod
-#     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor]:
-#         """Computes the backward pass for summation."""
-#         shape, _ = ctx.saved_values
-
-#         # Create ones tensor with original shape
-#         ones = minitorch.ones(shape, backend=grad_output.backend)
-#         total_elements = int(operators.prod(shape))  # Get total number of elements that were summed
-#         grad_input = grad_output.expand(ones) / (total_elements*total_elements)
-
-#         return grad_input,
+        (a,) = ctx.saved_values
+        return grad_output.f.mul_zip(a, grad_output)
 
 
 ##Sum 9-2
 class Sum(Function):
     @staticmethod
-    def forward(ctx: Context, t1: Tensor, dim: Tensor) -> Tensor:
+    def forward(ctx: Context, a: Tensor, dim: Tensor) -> Tensor:
         """Computes the forward pass for summation."""
         # Convert dim to integer or None before saving
         # dim_val = int(dim.item()) if dim is not None else None
@@ -543,8 +353,8 @@ class Sum(Function):
         #     flattened = t1.contiguous().view(t1.size)
         #     result = t1.f.add_reduce(flattened, 0)
         # return result
-        ctx.save_for_backward(t1.shape, dim)
-        return t1.f.add_reduce(t1, int(dim.item()))
+        ctx.save_for_backward(a.shape, dim)
+        return a.f.add_reduce(a, int(dim.item()))
 
 
     @staticmethod
@@ -560,35 +370,6 @@ class Sum(Function):
         #     return (grad_input,)
         a_shape, dim = ctx.saved_values
         return grad_output, 0.0 
-
-
-# ##Sum 10
-# class Sum(Function):
-#     @staticmethod
-#     def forward(ctx: Context, t1: Tensor, dim: Optional[Tensor] = None) -> Tensor:
-#         """Computes the forward pass for summation."""
-#         ctx.save_for_backward(t1.shape, dim)
-
-#         if dim is not None:
-#             dim_val = int(dim.item())
-#             return t1.f.add_reduce(t1, dim_val)
-#         else:
-#             flattened = t1.contiguous().view(t1.size)
-#             return t1.f.add_reduce(flattened, 0)
-
-#     @staticmethod
-#     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor]:
-#         """Computes the backward pass for summation."""
-#         shape, dim = ctx.saved_values
-
-#         # Create ones tensor with original shape
-#         ones = minitorch.ones(shape, backend=grad_output.backend)
-
-#         # Just expand the gradient output to match input shape
-#         # Let the division happen in the mean operation
-#         grad_input = grad_output.expand(ones)
-
-#         return grad_input,
 
 
 class LT(Function):
@@ -609,6 +390,7 @@ class EQ(Function):
     @staticmethod
     def forward(ctx: Context, a: Tensor, b: Tensor) -> Tensor:
         """Element-wise equality comparison of two tensors."""
+        ctx.save_for_backward(a.shape, b.shape)
         return a.f.eq_zip(a, b)
 
     @staticmethod
@@ -630,32 +412,6 @@ class IsClose(Function):
     #     return grad_output.zeros(grad_output.shape), grad_output.zeros(
     #         grad_output.shape
     #     )
-
-
-##permute 1
-# class Permute(Function):
-#     @staticmethod
-#     def forward(ctx: Context, a: Tensor, order: Tensor) -> Tensor:
-#         """Permutes the dimensions of the input tensor according to the given order."""
-#         ctx.save_for_backward(order)
-#         order_list = [int(order[i]) for i in range(order.size)]
-#         return minitorch.Tensor.make(a._tensor.permute(*order_list), backend=a.backend)
-
-#     @staticmethod
-#     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, float]:
-#         """Backward pass for permute."""
-#         (order,) = ctx.saved_values
-#         # Create inverse permutation
-#         n = len(order)
-#         inv_order = [0] * n
-#         for i, p in enumerate(order):
-#             inv_order[int(p)] = i
-#         # Permute gradient back to original order
-#         return minitorch.Tensor.make(
-#             grad_output._tensor.permute(*inv_order),
-#             backend=grad_output.backend
-#         ), 0.0
-
 
 # permute 2
 class Permute(Function):
@@ -691,7 +447,7 @@ class Permute(Function):
         # return minitorch.Tensor.make(
         #     grad_tensor._storage, grad_tensor.shape, backend=grad_output.backend
         # ), 0.0
-        order: Tensor = ctx.saved_value[0]
+        order: Tensor = ctx.saved_values[0]
         order2: List[int] = [
             a[0]
             for a in sorted(

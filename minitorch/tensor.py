@@ -393,6 +393,7 @@ class Tensor:
     #     """
     #     return int(operators.prod(self.shape))
     #Module 2 answer
+    @property
     def size(self) -> int:
         """Returns the total number of elements in the tensor.
 

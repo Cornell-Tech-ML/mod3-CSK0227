@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any, Iterable, Tuple, Protocol  # ,list
+from typing import Any, Iterable, Tuple, Protocol, List
 
 
 # ## Task 1.1
@@ -75,21 +75,21 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
         Non-constant Variables in topological order starting from the right.
 
     """
-    visited = set()
-    sorted_nodes = []
+    order: List[Variable] = []
+    seen = set()
 
-    def visit(v: Variable) -> None:
-        if v in visited or v.is_constant():
+    def visit(var: Variable) -> None:
+        if var.unique_id in seen or var.is_constant():
             return
-        else:
-            # visited.add(v)
-            for parent in v.parents:
-                visit(parent)
-            sorted_nodes.append(v)
-            visited.add(v)
-
+        if not var.is_leaf():
+            for m in var.parents:
+                if not m.is_constant():
+                    visit(m)
+        seen.add(var.unique_id)
+        order.insert(0, var)
+    
     visit(variable)
-    return reversed(sorted_nodes)
+    return order
 
 
 def backpropagate(variable: Variable, deriv: Any) -> None:
@@ -102,21 +102,20 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
         deriv: The derivative of the output with respect to this variable.
 
     """
-    ordered_variables = [*topological_sort(variable)]
-    gradients = {variable: deriv}
+    queue = topological_sort(variable)
+    derivatives = {}
+    derivatives[variable.unique_id] = deriv
 
-    for var in ordered_variables:
-        grad = gradients.get(var, 0)
+    for var in queue:
+        deriv = derivatives[var.unique_id]
         if var.is_leaf():
-            var.accumulate_derivative(grad)
+            var.accumulate_derivative(deriv)
         else:
-            for parent, parent_grad in var.chain_rule(grad):
-                if parent_grad is None:
-                    parent_grad = 0
-                if parent not in gradients:
-                    gradients[parent] = parent_grad
-                else:
-                    gradients[parent] += parent_grad
+            for v, d in var.chain_rule(deriv):
+                if v.is_constant():
+                    continue
+                derivatives.setdefault(v.unique_id, 0.0)
+                derivatives[v.unique_id] += d
 
 
 @dataclass

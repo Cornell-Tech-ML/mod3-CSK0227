@@ -24,7 +24,7 @@ def mul(a: float, b: float) -> float:
         float: The product of a and b.
 
     """
-    return float(a * b)
+    return a * b
 
 
 # # add div
@@ -74,7 +74,7 @@ def add(a: float, b: float) -> float:
         float: The sum of a and b.
 
     """
-    return float(a + b)
+    return a + b
 
 
 # - sub 240926+
@@ -91,7 +91,7 @@ def sub(a: float, b: float) -> float:
         float: The difference between a and b.
 
     """
-    return float(a - b)
+    return a - b
 
 
 # - neg
@@ -107,7 +107,7 @@ def neg(a: float) -> float:
         float: The negated value of a.
 
     """
-    return float(-a)
+    return -a
 
 
 # - lt
@@ -214,10 +214,10 @@ def sigmoid(a: float) -> float:
     """
     c: float
     if a >= 0:
-        c = 1 / (1 + math.exp(-a))
+        c = 1.0 / (1.0 + math.exp(-a))
     else:
-        c = math.exp(a) / (1 + math.exp(a))
-    return float(c)
+        c = math.exp(a) / (1.0 + math.exp(a))
+    return c
 
 
 # - relu
@@ -331,7 +331,7 @@ def inv_back(a: float, b: float) -> float:
         float: The product of the derivative of 1/a and b.
 
     """
-    return -(1.0 / (a**2)) * b
+    return -b / (a * a)
     # else:
     #     raise ValueError("Input should not be 0")
 

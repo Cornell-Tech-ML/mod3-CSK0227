@@ -39,9 +39,9 @@ class Network(minitorch.Module):
         self.layer3 = Linear(hidden_layers, 1)
 
     def forward(self, x):
-        middle = self.layer1.forward(x).relu()
-        end = self.layer2.forward(middle).relu()
-        return self.layer3.forward(end).sigmoid()
+        h = self.layer1.forward(x).relu()
+        h = self.layer2.forward(h).relu()
+        return self.layer3.forward(h).sigmoid()
 
 
 # #Linear 1
@@ -123,9 +123,12 @@ class Network(minitorch.Module):
 class Linear(minitorch.Module):
     def __init__(self, in_size, out_size):
         super().__init__()
-        self.weights = RParam(in_size, 1, out_size)
+        # self.weights = RParam(in_size, 1, out_size)
+        # self.bias = RParam(out_size)
+        # self.in_size = in_size
+        # self.out_size = out_size
+        self.weights = RParam(in_size,out_size)
         self.bias = RParam(out_size)
-        self.in_size = in_size
         self.out_size = out_size
 
     def forward(self, inputs):
@@ -133,14 +136,21 @@ class Linear(minitorch.Module):
         # Inputs are (batch, in)
 
         # (in, batch, 1) for input shape
-        b_size = inputs.shape[0]
-        inputs_T = inputs.view(1, b_size, self.in_size).permute(2, 1, 0)
+        #Original
+        # b_size = inputs.shape[0]
+        # inputs_T = inputs.view(1, b_size, self.in_size).permute(2, 1, 0)
 
-        # Use broadcasting to get:
-        # (in, 1, out) * (in, batch, 1) -> (in, batch, out)
-        broadcasted = self.weights.value * inputs_T
-        product = broadcasted.sum(0).view(b_size, self.out_size)  # Sum over in, then collapse
-        return product + self.bias.value
+        # # Use broadcasting to get:
+        # # (in, 1, out) * (in, batch, 1) -> (in, batch, out)
+        # broadcasted = self.weights.value * inputs_T
+        # product = broadcasted.sum(0).view(b_size, self.out_size)  # Sum over in, then collapse
+        # return product + self.bias.value
+
+        batch, in_size = x.shape
+        return (
+            self.weights.value.view(1, in_size, self.out_size)
+            * x.view(batch, in_size,1)    
+        ).sum(1).view(batch,self.out_size) + self.bias.value.view(self.out_size)
 
 
 def default_log_fn(epoch, total_loss, correct, losses):
