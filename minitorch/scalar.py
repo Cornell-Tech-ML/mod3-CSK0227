@@ -10,7 +10,7 @@ from .autodiff import Context, Variable, backpropagate, central_difference
 from .scalar_functions import (
     EQ,
     LT,
-    GT,
+    #GT,
     Add,
     Exp,
     Inv,
