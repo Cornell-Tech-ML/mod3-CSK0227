@@ -16,7 +16,6 @@ from .scalar_functions import (
     Inv,
     Log,
     Mul,
-    # Div, #add Div
     Neg,
     ReLU,
     ScalarFunction,
@@ -63,8 +62,11 @@ class Scalar:
     history: Optional[ScalarHistory] = field(default_factory=ScalarHistory)
     derivative: Optional[float] = None
     name: str = field(default="")
-    unique_id: int = field(default=0)
+    #unique_id: int = field(default=0)
+    #module 1 answer
+    unique_id: int = field(init= False, default=0)
 
+    #Need Hash?
     def __hash__(self):
         return hash(id(self))
 
@@ -97,55 +99,56 @@ class Scalar:
         return self * b
 
     ### 092624++
-    def __add__(self, b: ScalarLike) -> Scalar:
-        if isinstance(b, (int, float)):
-            return Add.apply(self, Scalar(b))
-        return Add.apply(self, b)
+    # def __add__(self, b: ScalarLike) -> Scalar:
+    #     if isinstance(b, (int, float)):
+    #         return Add.apply(self, Scalar(b))
+    #     return Add.apply(self, b)
 
-    def relu(self) -> Scalar:
-        """Apply the ReLU function to self"""
-        return ReLU.apply(self)
+    # def relu(self) -> Scalar:
+    #     """Apply the ReLU function to self"""
+    #     return ReLU.apply(self)
 
-    def __sub__(self, b: ScalarLike) -> Scalar:
-        if isinstance(b, (int, float)):
-            return Add.apply(self, Neg.apply(b))
-        return Add.apply(self, Neg.apply(b))
+    # def __sub__(self, b: ScalarLike) -> Scalar:
+    #     if isinstance(b, (int, float)):
+    #         return Add.apply(self, Neg.apply(b))
+    #     return Add.apply(self, Neg.apply(b))
 
+    # rsub needed?
     def __rsub__(self, b: ScalarLike) -> Scalar:
         if isinstance(b, (int, float)):
             return Add.apply(Neg.apply(self), b)
         return Add.apply(Neg.apply(self), b)
 
-    def __neg__(self) -> Scalar:
-        return Neg.apply(self)
+    # def __neg__(self) -> Scalar:
+    #     return Neg.apply(self)
 
-    def sigmoid(self) -> Scalar:
-        """Apply the sigmoid function to this scalar."""
-        return Sigmoid.apply(self)
+    # def sigmoid(self) -> Scalar:
+    #     """Apply the sigmoid function to this scalar."""
+    #     return Sigmoid.apply(self)
 
-    def log(self) -> Scalar:
-        """Apply the natural logarithm function to this scalar."""
-        return Log.apply(self)
+    # def log(self) -> Scalar:
+    #     """Apply the natural logarithm function to this scalar."""
+    #     return Log.apply(self)
 
-    def exp(self) -> Scalar:
-        """Apply the exponential function to this scalar."""
-        return Exp.apply(self)
+    # def exp(self) -> Scalar:
+    #     """Apply the exponential function to this scalar."""
+    #     return Exp.apply(self)
 
-    def __eq__(self, b: ScalarLike) -> Scalar:
-        if isinstance(b, (int, float)):
-            b = Scalar(b)
-        return EQ.apply(self, b)
+    # def __eq__(self, b: ScalarLike) -> Scalar:
+    #     if isinstance(b, (int, float)):
+    #         b = Scalar(b)
+    #     return EQ.apply(self, b)
 
-    def __lt__(self, b: ScalarLike) -> Scalar:
-        if isinstance(b, (int, float)):
-            return LT.apply(self, b)
-        return LT.apply(self, b)
+    # def __lt__(self, b: ScalarLike) -> Scalar:
+    #     if isinstance(b, (int, float)):
+    #         return LT.apply(self, b)
+    #     return LT.apply(self, b)
 
-    def __gt__(self, b: ScalarLike) -> Scalar:
-        if isinstance(b, (int, float)):
-            b = Scalar(b)
-            return GT.apply(self, b)
-        return GT.apply(self, b)
+    # def __gt__(self, b: ScalarLike) -> Scalar:
+    #     if isinstance(b, (int, float)):
+    #         b = Scalar(b)
+    #         return GT.apply(self, b)
+    #     return GT.apply(self, b)
 
     # def __div__(self,b : ScalarLike) -> Scalar:
     #   return Div.apply(self,b)
@@ -190,14 +193,16 @@ class Scalar:
         # TODO: Implement for Task 1.3.
         # raise NotImplementedError("Need to implement for Task 1.3")
         # Get the gradients with respect to the inputs
-        local_grads = h.last_fn._backward(h.ctx, d_output)
-        # if not isinstance(local_grads, Iterable):
-        #     local_grads = [local_grads]
 
-        paired_grads = zip(h.inputs, local_grads)
-        result = [(x, grad) for x, grad in paired_grads if not x.is_constant()]
+        # original
+        # local_grads = h.last_fn._backward(h.ctx, d_output)
+        # paired_grads = zip(h.inputs, local_grads)
+        # result = [(x, grad) for x, grad in paired_grads if not x.is_constant()]
+        # return result
 
-        return result
+        #module 1 answer
+        x = h.last_fn._backward(h.ctx, d_output)
+        return list(zip(h.inputs, x))
 
     def backward(self, d_output: Optional[float] = None) -> None:
         """Calls autodiff to fill in the derivatives for the history of this object.
@@ -214,61 +219,55 @@ class Scalar:
 
     # TODO: Implement for Task 1.2.
     # raise NotImplementedError("Need to implement for Task 1.2")
-
-
-#     #less than
-#     @staticmethod
-#     def LT(x: ScalarLike, y: ScalarLike) -> Scalar:
-#         """Compute the less than of x and y."""
-#         return LT.apply(x, y)
-
-#     #greater than
-#     @staticmethod
-#     def GT(x: ScalarLike, y: ScalarLike) -> Scalar:
-#         """Compute the greater than of x and y."""
-#         return GT.apply(x, y)
-
-#     #add
-#     @staticmethod
-#     def Add(x: ScalarLike, y: ScalarLike) -> Scalar:
-#         """Compute the addition of x and y."""
-#         return Add.apply(x, y)
-
-#     #subtract
-#     @staticmethod
-#     def Sub(x: ScalarLike, y: ScalarLike) -> Scalar:
-#         """Compute the subtraction of x and y."""
-#         return Add.apply(x, Neg.apply(y))
-
-#     #negation
-#     @staticmethod
-#     def Neg(x: ScalarLike) -> Scalar:
-#         """Compute the negation of x."""
-#         return Neg.apply(x)
-
-#     #log
-#     @staticmethod
-#     def Log(x: ScalarLike) -> Scalar:
-#         """Compute the natural logarithm of x."""
-#         return Log.apply(x)
-#     #exp
-#     @staticmethod
-#     def Exp(x: ScalarLike) -> Scalar:
-#         """Compute the exponential of x."""
-#         return Exp.apply(x)
-
-#     #sigmoid
-#     @staticmethod
-#     def Sigmoid(x: ScalarLike) -> Scalar:
-#         """Compute the sigmoid of x."""
-#         return Sigmoid.apply(x)
-
-# #relu
-#     @staticmethod
-#     def ReLU(x: ScalarLike) -> Scalar:
-#         """Compute the ReLU of x."""
-#         return ReLU.apply(x)
-
+    
+    def __add__(self, b: ScalarLike) -> Scalar:
+        # if isinstance(b, (int, float)):
+        #     return Add.apply(self, Scalar(b))
+        return Add.apply(self, b)
+    
+    def __lt__(self, b: ScalarLike) -> Scalar:
+        # if isinstance(b, (int, float)):
+        #     return LT.apply(self, b)
+        return LT.apply(self, b)
+    
+    def __gt__(self, b: ScalarLike) -> Scalar:
+        # if isinstance(b, (int, float)):
+        #     b = Scalar(b)
+        #     return GT.apply(self, b)
+        # return GT.apply(self, b)
+        return LT.apply(b,self)
+    
+    def __eq__(self, b: ScalarLike) -> Scalar:
+        # if isinstance(b, (int, float)):
+        #     b = Scalar(b)
+        # return EQ.apply(self, b)
+        return EQ.apply(b, self)
+    
+    def __sub__(self, b: ScalarLike) -> Scalar:
+        # if isinstance(b, (int, float)):
+        #     return Add.apply(self, Neg.apply(b))
+        # return Add.apply(self, Neg.apply(b))
+        return Add.apply(self, -b)
+    
+    def __neg__(self) -> Scalar:
+        return Neg.apply(self)
+    
+    def log(self) -> Scalar:
+        """Apply the natural logarithm function to this scalar."""
+        return Log.apply(self)
+    
+    def exp(self) -> Scalar:
+        """Apply the exponential function to this scalar."""
+        return Exp.apply(self)
+    
+    def sigmoid(self) -> Scalar:
+        """Apply the sigmoid function to this scalar."""
+        return Sigmoid.apply(self)
+    
+    def relu(self) -> Scalar:
+        """Apply the ReLU function to self"""
+        return ReLU.apply(self)
+    
 
 def derivative_check(f: Any, *scalars: Scalar) -> None:
     """Checks that autodiff works on a python function.
@@ -280,6 +279,7 @@ def derivative_check(f: Any, *scalars: Scalar) -> None:
         *scalars  : n input scalar values.
 
     """
+    print(f"\n{f}")
     out = f(*scalars)
     out.backward()
 

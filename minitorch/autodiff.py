@@ -25,12 +25,21 @@ def central_difference(f: Any, *vals: Any, arg: int = 0, epsilon: float = 1e-6) 
         An approximation of $f'_i(x_0, \ldots, x_{n-1})$
 
     """
-    # return (f(vals[0] + epsilon, *vals[1:]) - f(vals[0] - epsilon, *vals[1:])) / (2 * epsilon)
-    vals_plus = list(vals)
-    vals_minus = list(vals)
-    vals_plus[arg] += epsilon
-    vals_minus[arg] -= epsilon
-    return (f(*vals_plus) - f(*vals_minus)) / (2 * epsilon)
+    # #Original
+    # # return (f(vals[0] + epsilon, *vals[1:]) - f(vals[0] - epsilon, *vals[1:])) / (2 * epsilon)
+    # vals_plus = list(vals)
+    # vals_minus = list(vals)
+    # vals_plus[arg] += epsilon
+    # vals_minus[arg] -= epsilon
+    # return (f(*vals_plus) - f(*vals_minus)) / (2 * epsilon)
+
+    #modle 1 answer
+    vals1 = [v for v in vals]
+    vals2 = [v for v in vals]
+    vals1[arg] = vals1[arg] + epsilon
+    vals2[arg] = vals2[arg] - epsilon
+    delta = f(*vals1) - f(*vals2)
+    return delta / (2 * epsilon)
 
 
 variable_count = 1
@@ -115,7 +124,7 @@ def backpropagate(variable: Variable, deriv: Any) -> None:
                 if v.is_constant():
                     continue
                 derivatives.setdefault(v.unique_id, 0.0)
-                derivatives[v.unique_id] += d
+                derivatives[v.unique_id] = derivatives[v.unique_id] + d
 
 
 @dataclass
