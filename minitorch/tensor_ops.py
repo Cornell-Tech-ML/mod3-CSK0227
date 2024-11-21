@@ -253,8 +253,8 @@ class SimpleOps(TensorOps):
 # Implementations.
 
 
-def tensor_map(fn: Callable[[float], float]) -> Any :
-#Callable[[Storage, Shape, Strides, Storage, Shape, Strides], None]:
+def tensor_map(fn: Callable[[float], float]) -> Any:
+    # Callable[[Storage, Shape, Strides, Storage, Shape, Strides], None]:
     """Low-level implementation of tensor map between
     tensors with *possibly different strides*.
 
@@ -291,7 +291,7 @@ def tensor_map(fn: Callable[[float], float]) -> Any :
         ## TODO: Implement for Task 2.3.
         # raise NotImplementedError("Need to implement for Task 2.3")
 
-        #original
+        # original
         # # Convert list indices to numpy arrays
         # out_index = np.array([0] * len(out_shape), dtype=np.int32)
         # in_index = np.array([0] * len(in_shape), dtype=np.int32)
@@ -309,26 +309,29 @@ def tensor_map(fn: Callable[[float], float]) -> Any :
         #     out_position = index_to_position(out_index, out_strides)
         #     out[out_position] = fn(in_storage[in_position])
 
-        #module 2 answer
+        # module 2 answer
         # ASSIGN2.2
-        out_index: Index = np.zeros(MAX_DIMS, np.int16)
-        in_index: Index = np.zeros(MAX_DIMS, np.int16)
+        # out_index: Index = np.zeros(MAX_DIMS, np.int16)
+        # in_index: Index = np.zeros(MAX_DIMS, np.int16)
+
+        out_index: Index = np.zeros(MAX_DIMS, np.int32)
+        in_index: Index = np.zeros(MAX_DIMS, np.int32)
+
         for i in range(len(out)):
-           to_index(i, out_shape, out_index)
-           broadcast_index(out_index, out_shape, in_shape, in_index)
-           o = index_to_position(out_index, out_strides)
-           j = index_to_position(in_index, in_strides)
-           out[o] = fn(in_storage[j])
+            to_index(i, out_shape, out_index)
+            broadcast_index(out_index, out_shape, in_shape, in_index)
+            o = index_to_position(out_index, out_strides)
+            j = index_to_position(in_index, in_strides)
+            out[o] = fn(in_storage[j])
         # END ASSIGN2.2
 
     return _map
 
 
 def tensor_zip(fn: Callable[[float, float], float]) -> Any:
-
-#Callable[
-#    [Storage, Shape, Strides, Storage, Shape, Strides, Storage, Shape, Strides], None
-#]:
+    # Callable[
+    #    [Storage, Shape, Strides, Storage, Shape, Strides, Storage, Shape, Strides], None
+    # ]:
     """Low-level implementation of tensor zip between
     tensors with *possibly different strides*.
 
@@ -373,7 +376,7 @@ def tensor_zip(fn: Callable[[float, float], float]) -> Any:
         # a_index = [0] * len(a_shape)
         # b_index = [0] * len(b_shape)
 
-        #original
+        # original
         # # Convert list indices to numpy arrays
         # out_index = np.array([0] * len(out_shape), dtype=np.int32)
         # a_index = np.array([0] * len(a_shape), dtype=np.int32)
@@ -400,11 +403,11 @@ def tensor_zip(fn: Callable[[float, float], float]) -> Any:
         b_index: Index = np.zeros(MAX_DIMS, np.int32)
         for i in range(len(out)):
             to_index(i, out_shape, out_index)
-            o = index_to_position(out_index,out_strides)
+            o = index_to_position(out_index, out_strides)
             broadcast_index(out_index, out_shape, a_shape, a_index)
-            j = index_to_position(a_index,a_strides)
+            j = index_to_position(a_index, a_strides)
             broadcast_index(out_index, out_shape, b_shape, b_index)
-            k = index_to_position(b_index,b_strides)
+            k = index_to_position(b_index, b_strides)
             out[o] = fn(a_storage[j], b_storage[k])
         # END ASSIGN2.2
 
@@ -412,8 +415,7 @@ def tensor_zip(fn: Callable[[float, float], float]) -> Any:
 
 
 def tensor_reduce(fn: Callable[[float, float], float]) -> Any:
-
-#Callable[[Storage, Shape, Strides, Storage, Shape, Strides, int], None]:
+    # Callable[[Storage, Shape, Strides, Storage, Shape, Strides, int], None]:
     """Low-level implementation of tensor reduce.
 
     * `out_shape` will be the same as `a_shape`
@@ -441,7 +443,7 @@ def tensor_reduce(fn: Callable[[float, float], float]) -> Any:
         ## TODO: Implement for Task 2.3.
         # raise NotImplementedError("Need to implement for Task 2.3")
 
-        #Original 
+        # Original
         # # Convert list indices to numpy arrays
         # out_index = np.array([0] * len(out_shape), dtype=np.int32)
         # a_index = np.array([0] * len(a_shape), dtype=np.int32)
@@ -474,7 +476,8 @@ def tensor_reduce(fn: Callable[[float, float], float]) -> Any:
                 out_index[reduce_dim] = s
                 j = index_to_position(out_index, a_strides)
                 out[o] = fn(out[o], a_storage[j])
-       # END ASSIGN2.2
+
+    # END ASSIGN2.2
 
     return _reduce
 

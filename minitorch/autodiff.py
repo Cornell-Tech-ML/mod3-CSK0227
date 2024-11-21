@@ -33,7 +33,7 @@ def central_difference(f: Any, *vals: Any, arg: int = 0, epsilon: float = 1e-6) 
     # vals_minus[arg] -= epsilon
     # return (f(*vals_plus) - f(*vals_minus)) / (2 * epsilon)
 
-    #modle 1 answer
+    # modle 1 answer
     vals1 = [v for v in vals]
     vals2 = [v for v in vals]
     vals1[arg] = vals1[arg] + epsilon
@@ -96,7 +96,7 @@ def topological_sort(variable: Variable) -> Iterable[Variable]:
                     visit(m)
         seen.add(var.unique_id)
         order.insert(0, var)
-    
+
     visit(variable)
     return order
 

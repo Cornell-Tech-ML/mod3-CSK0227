@@ -41,10 +41,10 @@ class Network(minitorch.Module):
 
         # Layer 1: Apply linear transformation and ReLU
         h1 = self.layer1.forward(x).relu()
-        
+
         # Layer 2: Apply linear transformation and ReLU
         h2 = self.layer2.forward(h1).relu()
-        
+
         # Layer 3: Final linear transformation
         return self.layer3.forward(h2).sigmoid()
 
@@ -64,7 +64,7 @@ class Linear(minitorch.Module):
 
         # Matrix multiplication of input with weights
         batch_output = x @ self.weights.value
-        
+
         # Add bias to each output
         return batch_output + self.bias.value
 
@@ -91,7 +91,7 @@ class FastTrain:
         start_time = time.time()
 
         for epoch in range(max_epochs):
-            
+
             #new for timer
             epoch_start = time.time()
 

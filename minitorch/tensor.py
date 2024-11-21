@@ -392,7 +392,7 @@ class Tensor:
 
     #     """
     #     return int(operators.prod(self.shape))
-    #Module 2 answer
+    # Module 2 answer
     @property
     def size(self) -> int:
         """Returns the total number of elements in the tensor.
@@ -404,7 +404,7 @@ class Tensor:
         """
         return self._tensor.size
 
-    #Module 2 answer
+    # Module 2 answer
     @property
     def dims(self) -> int:
         """Returns the number of dimensions of the tensor.
@@ -427,68 +427,67 @@ class Tensor:
     #     """
     #     return len(self.shape)
 
-    
     # #Function before answer
     # def __add__(self, b: TensorLike) -> Tensor:
     #     return Add.apply(self, self._ensure_tensor(b))
-    
-    #Module 2 answer
+
+    # Module 2 answer
     def __add__(self, b: TensorLike) -> Tensor:
         return Add.apply(self, self._ensure_tensor(b))
 
     # def __radd__(self, b: TensorLike) -> Tensor:
     #     return Add.apply(self._ensure_tensor(b), self)
-    
-    #Module 2 answer
+
+    # Module 2 answer
     def __radd__(self, b: TensorLike) -> Tensor:
         return self + b
 
     # def __sub__(self, b: TensorLike) -> Tensor:
     #     return Add.apply(self, Neg.apply(self._ensure_tensor(b)))
-    
-    #Module 2 answer
+
+    # Module 2 answer
     def __sub__(self, b: TensorLike) -> Tensor:
         return Add.apply(self, -self._ensure_tensor(b))
 
     # def __mul__(self, b: TensorLike) -> Tensor:
     #     return Mul.apply(self, self._ensure_tensor(b))
-    
-    #Module 2 answer
+
+    # Module 2 answer
     def __mul__(self, b: TensorLike) -> Tensor:
         return Mul.apply(self, self._ensure_tensor(b))
 
     # def __rmul__(self, b: TensorLike) -> Tensor:
     #     return Mul.apply(self._ensure_tensor(b), self)
-    
-    #Module 2 answer
+
+    # Module 2 answer
     def __rmul__(self, b: TensorLike) -> Tensor:
         return self * b
 
     # def __lt__(self, b: TensorLike) -> Tensor:
     #     return LT.apply(self, self._ensure_tensor(b))
-    
-    #Module 2 answer
+
+    # Module 2 answer
     def __lt__(self, b: TensorLike) -> Tensor:
         return LT.apply(self, self._ensure_tensor(b))
 
     # def __eq__(self, b: TensorLike) -> Tensor:
     #     return EQ.apply(self, self._ensure_tensor(b))
-    
-    #Module 2 answer
+
+    # Module 2 answer
     def __eq__(self, b: TensorLike) -> Tensor:  # type: ignore[override]
         return EQ.apply(self, self._ensure_tensor(b))
 
     # def __gt__(self, b: TensorLike) -> Tensor:
     #     return LT.apply(self._ensure_tensor(b), self)
-    
-    #Module 2 answer
+
+    # Module 2 answer
     def __gt__(self, b: TensorLike) -> Tensor:
         return LT.apply(self._ensure_tensor(b), self)
 
     # def __neg__(self) -> Tensor:
     #     return Neg.apply(self)
-    
-    #Module 2 answer
+
+    # Module 2 answer
     def __neg__(self) -> Tensor:
         return Neg.apply(self)
 
@@ -521,7 +520,7 @@ class Tensor:
     #         result = result.sum(0)  # Reduce to match expected shape
 
     #     return result
-    
+
     ##Module 2 answer for all
     def all(self, dim: Optional[int] = None) -> Tensor:
         """Returns True if all elements in the input tensor are True.
@@ -551,7 +550,7 @@ class Tensor:
 
     #     """
     #     return IsClose.apply(self, b)
-    
+
     def is_close(self, y: Tensor) -> Tensor:
         """Compares this tensor with another tensor for element-wise approximate equality.
 
@@ -656,7 +655,6 @@ class Tensor:
         else:
             return Sum.apply(self, self._ensure_tensor(dim))
 
-
     ##Module 2 Answer
     def mean(self, dim: Optional[int] = None) -> Tensor:
         """Computes the mean of all elements in the tensor along the specified dimension.
@@ -705,12 +703,12 @@ class Tensor:
 
     #         return self.sum(dim) / self.shape[dim]
 
-        # if dim is None:
-        # # Cast total size to int to ensure compatibility with _ensure_tensor
-        #     return self.sum() / int(self.size)
-        # else:
-        # # Cast shape[dim] to int to ensure compatibility with _ensure_tensor
-        #     return self.sum(dim) / int(self.shape[dim])
+    # if dim is None:
+    # # Cast total size to int to ensure compatibility with _ensure_tensor
+    #     return self.sum() / int(self.size)
+    # else:
+    # # Cast shape[dim] to int to ensure compatibility with _ensure_tensor
+    #     return self.sum(dim) / int(self.shape[dim])
 
     # ##Mean 2
     # def numel(self) -> int:

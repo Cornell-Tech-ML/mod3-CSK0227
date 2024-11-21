@@ -68,12 +68,12 @@ class Add(ScalarFunction):
     @staticmethod
     def forward(ctx: Context, a: float, b: float) -> float:
         """Add two scalar values."""
-        #return operators.add(a, b)
-        #Module 1 answer
+        # return operators.add(a, b)
+        # Module 1 answer
         return a + b
 
     @staticmethod
-    #def backward(ctx: Context, d_output: float) -> Tuple[float, float]:
+    # def backward(ctx: Context, d_output: float) -> Tuple[float, float]:
     def backward(ctx: Context, d_output: float) -> Tuple[float, ...]:
         """Backward pass for addition operation."""
         return d_output, d_output
@@ -108,8 +108,8 @@ class Mul(ScalarFunction):
     def forward(ctx: Context, a: float, b: float) -> float:
         """Forward pass for multiplication operation."""
         ctx.save_for_backward(a, b)
-        #return operators.mul(a, b)
-        #module 1 answer
+        # return operators.mul(a, b)
+        # module 1 answer
         c = a * b
         return c
 
@@ -118,10 +118,10 @@ class Mul(ScalarFunction):
         """Backward pass for multiplication operation."""
         # (a, b) = ctx.saved_values
         # return d_output * b, d_output * a
-        #module 1 answer
+        # module 1 answer
         a, b = ctx.saved_values
         return b * d_output, a * d_output
-        
+
 
 class Inv(ScalarFunction):
     """Inverse function $f(x) = 1/x$"""
@@ -145,15 +145,15 @@ class Neg(ScalarFunction):
     @staticmethod
     def forward(ctx: Context, a: float) -> float:
         """Forward pass for negation operation."""
-        #return operators.neg(a)
-        #module 1 answer
+        # return operators.neg(a)
+        # module 1 answer
         return -a
 
     @staticmethod
     def backward(ctx: Context, d_output: float) -> float:
         """Backward pass for negation operation."""
-        #return operators.neg(d_output)
-        #module 1 answer
+        # return operators.neg(d_output)
+        # module 1 answer
         return -d_output
 
 
@@ -185,8 +185,8 @@ class Sigmoid(ScalarFunction):
         """
         # (a,) = ctx.saved_values
         # return d_output * operators.sigmoid_back(a, d_output)
-        #module 1 answer
-        sigma : float = ctx.saved_values[0]
+        # module 1 answer
+        sigma: float = ctx.saved_values[0]
         return sigma * (1.0 - sigma) * d_output
 
 
@@ -204,9 +204,9 @@ class ReLU(ScalarFunction):
     def backward(ctx: Context, d_output: float) -> float:
         """Backward pass for ReLU operation."""
         (a,) = ctx.saved_values
-        #return d_output * operators.relu_back(a, d_output)
-        #module 1 answer
-        return operators.relu_back[a,d_output]
+        # return d_output * operators.relu_back(a, d_output)
+        # module 1 answer
+        return operators.relu_back(a, d_output)
 
 
 class Exp(ScalarFunction):
@@ -217,7 +217,7 @@ class Exp(ScalarFunction):
         """Forward pass for exponential operation."""
         # ctx.save_for_backward(a)
         # return operators.exp(a)
-        #module 1 answer
+        # module 1 answer
         out = operators.exp(a)
         ctx.save_for_backward(out)
         return out
@@ -227,8 +227,8 @@ class Exp(ScalarFunction):
         """Backward pass for exponential operation."""
         # (a,) = ctx.saved_values
         # return d_output * operators.exp(a)
-        #module 1 answer
-        out : float = ctx.saved_values[0]
+        # module 1 answer
+        out: float = ctx.saved_values[0]
         return d_output * out
 
 
@@ -239,7 +239,7 @@ class LT(ScalarFunction):
     def forward(ctx: Context, a: float, b: float) -> float:
         """Forward pass for less than operation."""
         # return operators.lt(a, b)
-        #module 1 answer
+        # module 1 answer
         return 1.0 if a < b else 0.0
 
     @staticmethod
@@ -255,7 +255,7 @@ class EQ(ScalarFunction):
     def forward(ctx: Context, a: float, b: float) -> float:
         """Forward pass for equal operation."""
         # return operators.eq(a, b)
-        #module 1 answer
+        # module 1 answer
         return 1.0 if a == b else 0.0
 
     @staticmethod
@@ -263,7 +263,9 @@ class EQ(ScalarFunction):
         """Backward pass for equal operation."""
         return 0.0, 0.0
 
+
 ## maybe GT is not necessary
+
 
 class GT(ScalarFunction):
     """Greater than function $f(x,y) = x > y$"""
@@ -277,6 +279,3 @@ class GT(ScalarFunction):
     def backward(ctx: Context, d_output: float) -> Tuple[float, float]:
         """Backward pass for greater than operation."""
         return 0.0, 0.0
-
-
-

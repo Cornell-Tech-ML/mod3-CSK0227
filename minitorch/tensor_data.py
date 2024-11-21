@@ -67,10 +67,11 @@ def to_index(ordinal: int, shape: Shape, out_index: OutIndex) -> None:
 
     """
     cur_ord = ordinal + 0
-    for i in range(len(shape)-1, -1, -1):
+    for i in range(len(shape) - 1, -1, -1):
         sh = shape[i]
         out_index[i] = int(cur_ord % sh)
         cur_ord = cur_ord // sh
+
 
 def broadcast_index(
     big_index: Index, big_shape: Shape, shape: Shape, out_index: OutIndex
@@ -114,12 +115,12 @@ def broadcast_index(
     # out_index[:] = out_index[::-1]
     # ASSIGN2.2
     for i, s in enumerate(shape):
-       if s > 1:
-           out_index[i] = big_index[i + (len(big_shape) - len(shape))]
-       else:
-           out_index[i] = 0
+        if s > 1:
+            out_index[i] = big_index[i + (len(big_shape) - len(shape))]
+        else:
+            out_index[i] = 0
     return None
-    #END ASSIGN2.2
+    # END ASSIGN2.2
 
 
 def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
@@ -161,7 +162,7 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
 
     # # Reverse back and return as tuple
     # return tuple(reversed(result))
-    #Module 2 answer
+    # Module 2 answer
     # ASSIGN2.2
     a, b = shape1, shape2
     m = max(len(a), len(b))
@@ -169,16 +170,16 @@ def shape_broadcast(shape1: UserShape, shape2: UserShape) -> UserShape:
     a_rev = list(reversed(a))
     b_rev = list(reversed(b))
     for i in range(m):
-       if i >= len(a):
-           c_rev[i] = b_rev[i]
-       elif i >= len(b):
-           c_rev[i] = a_rev[i]
-       else:
-           c_rev[i] = max(a_rev[i],b_rev[i])
-           if a_rev[i] != c_rev[i] and a_rev[i] != 1:
-               raise IndexingError(f"Broadcast failure {a} {b}")
-           if b_rev[i] != c_rev[i] and b_rev[i] != 1:
-               raise IndexingError(f"Broadcast failure {a} {b}")
+        if i >= len(a):
+            c_rev[i] = b_rev[i]
+        elif i >= len(b):
+            c_rev[i] = a_rev[i]
+        else:
+            c_rev[i] = max(a_rev[i], b_rev[i])
+            if a_rev[i] != c_rev[i] and a_rev[i] != 1:
+                raise IndexingError(f"Broadcast failure {a} {b}")
+            if b_rev[i] != c_rev[i] and b_rev[i] != 1:
+                raise IndexingError(f"Broadcast failure {a} {b}")
     return tuple(reversed(c_rev))
     # END ASSIGN2.2
 
@@ -381,7 +382,7 @@ class TensorData:
         ## TODO: Implement for Task 2.1.
         # raise NotImplementedError("Need to implement for Task 2.1")
 
-        #Original
+        # Original
         # # Create new shape based on the given order
         # new_shape = tuple(self.shape[i] for i in order)
 

@@ -36,15 +36,15 @@ The files that will be synced are:
 
 ```
 MAP
- 
+
 ================================================================================
- Parallel Accelerator Optimizing:  Function tensor_map.<locals>._map, 
-C:\Users\mlock\Desktop\CS 5781 Machine Learning 
-Engineering\workspace\mod3-CSK0227\minitorch\fast_ops.py (176)  
+ Parallel Accelerator Optimizing:  Function tensor_map.<locals>._map,
+C:\Users\mlock\Desktop\CS 5781 Machine Learning
+Engineering\workspace\mod3-CSK0227\minitorch\fast_ops.py (176)
 ================================================================================
 
 
-Parallel loop listing for  Function tensor_map.<locals>._map, C:\Users\mlock\Desktop\CS 5781 Machine Learning Engineering\workspace\mod3-CSK0227\minitorch\fast_ops.py (176) 
+Parallel loop listing for  Function tensor_map.<locals>._map, C:\Users\mlock\Desktop\CS 5781 Machine Learning Engineering\workspace\mod3-CSK0227\minitorch\fast_ops.py (176)
 -----------------------------------------------------------------------------|loop #ID
     def _map(                                                                |
         out: Storage,                                                        |
@@ -95,14 +95,14 @@ before the loop is executed and reused inside the loop):
    Allocation:: out_index = np.empty(MAX_DIMS, np.int32)
     - numpy.empty() is used for the allocation.
 The memory allocation derived from the instruction at C:\Users\mlock\Desktop\CS
-5781 Machine Learning Engineering\workspace\mod3-CSK0227\minitorch\fast_ops.py 
+5781 Machine Learning Engineering\workspace\mod3-CSK0227\minitorch\fast_ops.py
 (197) is hoisted out of the parallel loop labelled #1 (it will be performed
 before the loop is executed and reused inside the loop):
    Allocation:: in_index = np.empty(MAX_DIMS, np.int32)
     - numpy.empty() is used for the allocation.
 None
 ZIP
- 
+
 ================================================================================
  Parallel Accelerator Optimizing:  Function tensor_zip.<locals>._zip,
 C:\Users\mlock\Desktop\CS 5781 Machine Learning
@@ -165,7 +165,7 @@ Parallel structure is already optimal.
 ---------------------------Loop invariant code motion---------------------------
 Allocation hoisting:
 The memory allocation derived from the instruction at C:\Users\mlock\Desktop\CS
-5781 Machine Learning Engineering\workspace\mod3-CSK0227\minitorch\fast_ops.py 
+5781 Machine Learning Engineering\workspace\mod3-CSK0227\minitorch\fast_ops.py
 (258) is hoisted out of the parallel loop labelled #3 (it will be performed
 before the loop is executed and reused inside the loop):
    Allocation:: out_index = np.empty(MAX_DIMS, np.int32)
@@ -184,7 +184,7 @@ before the loop is executed and reused inside the loop):
     - numpy.empty() is used for the allocation.
 None
 REDUCE
- 
+
 ================================================================================
  Parallel Accelerator Optimizing:  Function tensor_reduce.<locals>._reduce,
 C:\Users\mlock\Desktop\CS 5781 Machine Learning
@@ -250,7 +250,7 @@ The memory allocation derived from the instruction at C:\Users\mlock\Desktop\CS
 before the loop is executed and reused inside the loop):
    Allocation:: out_index = np.empty(MAX_DIMS, np.int32)
     - numpy.empty() is used for the allocation.
-The memory allocation derived from the instruction at C:\Users\mlock\Desktop\CS 
+The memory allocation derived from the instruction at C:\Users\mlock\Desktop\CS
 5781 Machine Learning Engineering\workspace\mod3-CSK0227\minitorch\fast_ops.py
 (316) is hoisted out of the parallel loop labelled #5 (it will be performed
 before the loop is executed and reused inside the loop):
@@ -258,7 +258,7 @@ before the loop is executed and reused inside the loop):
     - numpy.empty() is used for the allocation.
 None
 MATRIX MULTIPLY
- 
+
 ================================================================================
  Parallel Accelerator Optimizing:  Function _tensor_matrix_multiply,
 C:\Users\mlock\Desktop\CS 5781 Machine Learning
@@ -388,7 +388,7 @@ platform linux -- Python 3.12.7, pytest-8.3.2, pluggy-1.5.0
 rootdir: /content/mod3-CSK0227
 configfile: pyproject.toml
 plugins: env-1.1.4, hypothesis-6.54.0
-collected 117 items / 60 deselected / 57 selected                                                  
+collected 117 items / 60 deselected / 57 selected
 
 tests/test_tensor_general.py .........................................................       [100%]
 
@@ -407,7 +407,7 @@ platform linux -- Python 3.12.7, pytest-8.3.2, pluggy-1.5.0
 rootdir: /content/mod3-CSK0227
 configfile: pyproject.toml
 plugins: env-1.1.4, hypothesis-6.54.0
-collected 117 items / 110 deselected / 7 selected                                                  
+collected 117 items / 110 deselected / 7 selected
 
 tests/test_tensor_general.py .......                                                         [100%]
 

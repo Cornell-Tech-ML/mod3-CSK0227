@@ -14,7 +14,7 @@ from .autodiff import Context
 from .tensor_ops import SimpleBackend, TensorBackend
 
 if TYPE_CHECKING:
-    from typing import Any, List, Tuple, Optional  # add optional
+    from typing import Any, List, Tuple  # add optional
 
     from .tensor import Tensor
     from .tensor_data import UserIndex, UserShape
@@ -267,7 +267,7 @@ class Mul(Function):
         """Backward pass for multiplication."""
         a, b = ctx.saved_values
         return (
-            grad_output.f.mul_zip(b, grad_output), 
+            grad_output.f.mul_zip(b, grad_output),
             grad_output.f.mul_zip(a, grad_output),
         )
 
@@ -286,9 +286,9 @@ class Sigmoid(Function):
         # (out,) = ctx.saved_values
         # one = out._ensure_tensor(1.0)
         # return grad_output * out * (one - out)
-        #module 2 answer
-        sigma : Tensor = ctx.saved_values[0]
-        return sigma * (-sigma + 1.0) *grad_output
+        # module 2 answer
+        sigma: Tensor = ctx.saved_values[0]
+        return sigma * (-sigma + 1.0) * grad_output
 
 
 class ReLU(Function):
@@ -303,7 +303,7 @@ class ReLU(Function):
         """Applied the ReLU Fuction backward"""
         # (a,) = ctx.saved_tensors
         # return grad_output * (a > 0)
-        #Module 2 answer
+        # Module 2 answer
         (a,) = ctx.saved_tensors
         return grad_output.f.relu_back_zip(a, grad_output)
 
@@ -356,7 +356,6 @@ class Sum(Function):
         ctx.save_for_backward(a.shape, dim)
         return a.f.add_reduce(a, int(dim.item()))
 
-
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, float]:
         """Computes the backward pass for summation."""
@@ -369,7 +368,7 @@ class Sum(Function):
         # else:
         #     return (grad_input,)
         a_shape, dim = ctx.saved_values
-        return grad_output, 0.0 
+        return grad_output, 0.0
 
 
 class LT(Function):
@@ -413,6 +412,7 @@ class IsClose(Function):
     #         grad_output.shape
     #     )
 
+
 # permute 2
 class Permute(Function):
     @staticmethod
@@ -432,7 +432,7 @@ class Permute(Function):
     @staticmethod
     def backward(ctx: Context, grad_output: Tensor) -> Tuple[Tensor, float]:
         """Backward pass for permute. Reverses the permutation applied in forward."""
-        #original
+        # original
         # (order,) = ctx.saved_values
 
         # # Create inverse permutation
@@ -451,7 +451,7 @@ class Permute(Function):
         order2: List[int] = [
             a[0]
             for a in sorted(
-                enumerate ([order[i] for i in range(order.size)]), key=lambda a : a[1]
+                enumerate([order[i] for i in range(order.size)]), key=lambda a: a[1]
             )
         ]
         return grad_output._new(grad_output._tensor.permute(*order2)), 0.0
