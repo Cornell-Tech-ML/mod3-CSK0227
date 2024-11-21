@@ -4,15 +4,22 @@ import numba
 
 import minitorch
 
+#newtimer
+import time
+
 datasets = minitorch.datasets
 FastTensorBackend = minitorch.TensorBackend(minitorch.FastOps)
 if numba.cuda.is_available():
     GPUBackend = minitorch.TensorBackend(minitorch.CudaOps)
 
 
-def default_log_fn(epoch, total_loss, correct, losses):
-    print("Epoch ", epoch, " loss ", total_loss, "correct", correct)
+# old log
+# def default_log_fn(epoch, total_loss, correct, losses):
+#     print("Epoch ", epoch, " loss ", total_loss, "correct", correct)
 
+# New Log
+def default_log_fn(epoch, total_loss, correct, losses, epoch_time, total_time):
+    print(f"Epoch {epoch:3d} | loss {total_loss:8.4f} | correct {correct:3d} | epoch time {epoch_time:6.3f}s | total time {total_time:8.3f}s")
 
 def RParam(*shape, backend):
     r = minitorch.rand(shape, backend=backend) - 0.5
@@ -29,8 +36,17 @@ class Network(minitorch.Module):
         self.layer3 = Linear(hidden, 1, backend)
 
     def forward(self, x):
-        # TODO: Implement for Task 3.5.
-        raise NotImplementedError("Need to implement for Task 3.5")
+        # # TODO: Implement for Task 3.5.
+        # raise NotImplementedError("Need to implement for Task 3.5")
+
+        # Layer 1: Apply linear transformation and ReLU
+        h1 = self.layer1.forward(x).relu()
+
+        # Layer 2: Apply linear transformation and ReLU
+        h2 = self.layer2.forward(h1).relu()
+
+        # Layer 3: Final linear transformation
+        return self.layer3.forward(h2).sigmoid()
 
 
 class Linear(minitorch.Module):
@@ -43,8 +59,14 @@ class Linear(minitorch.Module):
         self.out_size = out_size
 
     def forward(self, x):
-        # TODO: Implement for Task 3.5.
-        raise NotImplementedError("Need to implement for Task 3.5")
+        # # TODO: Implement for Task 3.5.
+        # raise NotImplementedError("Need to implement for Task 3.5")
+
+        # Matrix multiplication of input with weights
+        batch_output = x @ self.weights.value
+
+        # Add bias to each output
+        return batch_output + self.bias.value
 
 
 class FastTrain:
@@ -65,7 +87,14 @@ class FastTrain:
         BATCH = 10
         losses = []
 
+        #for timer
+        start_time = time.time()
+
         for epoch in range(max_epochs):
+
+            #new for timer
+            epoch_start = time.time()
+
             total_loss = 0.0
             c = list(zip(data.X, data.y))
             random.shuffle(c)
@@ -88,6 +117,11 @@ class FastTrain:
                 optim.step()
 
             losses.append(total_loss)
+
+            #new for timer
+            epoch_time = time.time() - epoch_start
+            total_time = time.time() - start_time
+
             # Logging
             if epoch % 10 == 0 or epoch == max_epochs:
                 X = minitorch.tensor(data.X, backend=self.backend)
@@ -95,7 +129,11 @@ class FastTrain:
                 out = self.model.forward(X).view(y.shape[0])
                 y2 = minitorch.tensor(data.y)
                 correct = int(((out.detach() > 0.5) == y2).sum()[0])
-                log_fn(epoch, total_loss, correct, losses)
+                #old log
+                #log_fn(epoch, total_loss, correct, losses)
+
+                #new log for timer
+                log_fn(epoch, total_loss, correct, losses, epoch_time, total_time)
 
 
 if __name__ == "__main__":
@@ -116,7 +154,7 @@ if __name__ == "__main__":
     if args.DATASET == "xor":
         data = minitorch.datasets["Xor"](PTS)
     elif args.DATASET == "simple":
-        data = minitorch.datasets["Simple"].simple(PTS)
+        data = minitorch.datasets["Simple"](PTS)
     elif args.DATASET == "split":
         data = minitorch.datasets["Split"](PTS)
 
